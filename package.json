@@ -1,0 +1,24 @@
+{
+  "name": "kubeplayground",
+  "version": "1.0.0",
+  "description": "Playground for NodeJS + Kubernetes",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alanchristensen/kubeplayground.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alanchristensen/kubeplayground/issues"
+  },
+  "homepage": "https://github.com/alanchristensen/kubeplayground#readme",
+  "dependencies": {
+    "@godaddy/terminus": "^2.2.0"
+  }
+}
