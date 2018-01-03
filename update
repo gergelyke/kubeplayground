@@ -8,5 +8,5 @@ echo $version > version
 
 docker build -t hello-node:v$version .
 
-# kubectl set image deployment/hello-node hello-node=hello-node:v$version
+kubectl set image deployment/hello-node hello-node=hello-node:v$version
 
