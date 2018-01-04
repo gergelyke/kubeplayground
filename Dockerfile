@@ -2,6 +2,7 @@ FROM node:latest
 EXPOSE 8080
 COPY server.js .
 COPY version .
+# COPY healthchecks healthchecks
 COPY node_modules node_modules
 
 # TODO: Test with npm start instead
