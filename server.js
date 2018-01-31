@@ -1,12 +1,15 @@
 const http = require('http');
 const fs = require('fs');
 const { performance } = require('perf_hooks');
+const stoppable = require('stoppable');
 
 const PORT = 8080;
+const SERVER_GRACE_STOP_MS = 10 * 1000;
+const READINESS_FAILURE_TIME_MS = 2 * 2 * 1000 + 5000; // periodSeconds * failureThreshold + a bit more just in case
 const version = fs.readFileSync('version');
 let gotSIGTERM = false;
 
-const server = http.createServer((req, res) => {
+let server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url.match(/\/healthcheck/)) {
     if (gotSIGTERM) {
       console.log(`Healthcheck ${req.url} NOT OK`);
@@ -28,6 +31,8 @@ const server = http.createServer((req, res) => {
   }
 });
 
+server = stoppable(server, SERVER_GRACE_STOP_MS);
+
 console.log('Starting up');
 server.listen(PORT, _ => {
   console.log('Up');
@@ -36,15 +41,15 @@ server.listen(PORT, _ => {
 process.on('SIGTERM', _ => {
   gotSIGTERM = true;
   console.log('SIGTERM');
-  setInterval(_ => {
-    console.log('Waiting to Close');
-  }, 10000);
-
   performance.mark('A');
-  server.close(_ => {
-    performance.mark('B');
-    performance.measure('A to B', 'A', 'B');
-    const measure = performance.getEntriesByName('A to B')[0];
-    console.log(`Server closed ${measure.duration}`);
-  });
+
+  // Let the readiness probes fail before we close the server
+  setTimeout(_ => {
+    server.stop(_ => {
+      performance.mark('B');
+      performance.measure('A to B', 'A', 'B');
+      const measure = performance.getEntriesByName('A to B')[0];
+      console.log(`Server closed ${measure.duration}`);
+    });
+  }, READINESS_FAILURE_TIME_MS);
 });

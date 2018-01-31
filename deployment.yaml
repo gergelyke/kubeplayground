@@ -25,11 +25,11 @@ spec:
             path: /healthcheck?type=readiness
             port: 8080
             scheme: HTTP
-          initialDelaySeconds: 2
+          initialDelaySeconds: 5
           timeoutSeconds: 1
           periodSeconds: 2
           successThreshold: 1
-          failureThreshold: 2
+          failureThreshold: 3
         livenessProbe:
           httpGet:
             path: /healthcheck?type=liveness

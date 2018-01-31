@@ -1,8 +1,6 @@
 # kubeplayground
 
 
-
-
 TODO:
 Fix https://github.com/RisingStack/kubernetes-graceful-shutdown-example#docker-signaling
 
