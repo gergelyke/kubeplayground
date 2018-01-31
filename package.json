@@ -19,6 +19,6 @@
   },
   "homepage": "https://github.com/alanchristensen/kubeplayground#readme",
   "dependencies": {
-    "stoppable": "^1.0.5"
+    "@godaddy/terminus": "^2.2.0"
   }
 }

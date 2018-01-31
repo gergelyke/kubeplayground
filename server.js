@@ -1,55 +1,47 @@
 const http = require('http');
+const terminus = require('@godaddy/terminus');
 const fs = require('fs');
-const { performance } = require('perf_hooks');
-const stoppable = require('stoppable');
 
 const PORT = 8080;
-const SERVER_GRACE_STOP_MS = 10 * 1000;
-const READINESS_FAILURE_TIME_MS = 2 * 2 * 1000 + 5000; // periodSeconds * failureThreshold + a bit more just in case
 const version = fs.readFileSync('version');
-let gotSIGTERM = false;
+let gotSignal = false;
 
-let server = http.createServer((req, res) => {
-  if (req.method === 'GET' && req.url.match(/\/healthcheck/)) {
-    if (gotSIGTERM) {
-      console.log(`Healthcheck ${req.url} NOT OK`);
-      res.writeHead(500);
-      res.end('not ok');
-    } else {
-      console.log(`Healthcheck ${req.url} ok`);
-      res.writeHead(200);
-      res.end('ok');
-    }
-  } else {
-    if (gotSIGTERM) {
-      console.log(`Request after SIGTERM: ${req.url}`);
-    }
-    setTimeout(_ => {
-      res.writeHead(200);
-      res.end(`Hello Playground! ${version}`);
-    }, 100);
+function onSignal () {
+  console.log('server is starting cleanup');
+  gotSignal = true;
+  return Promise.resolve();
+}
+
+function onShutdown () {
+  console.log('cleanup finished, server is shutting down');
+}
+
+function check() {
+  return Promise.resolve();
+}
+
+const server = http.createServer((request, response) => {
+  if (gotSignal) {
+    console.log(`request ${req.url} after onSignal`);
   }
+  setTimeout(() => {
+    response.end(`<html><body><h1>Hello, World! v${version}</h1></body></html>`);
+  }, 200);
+})
+
+terminus(server, {
+  // healtcheck options
+  healthChecks: {
+    '/healthcheck': check          // a promise returning function indicating service health
+  },
+
+  // cleanup options
+  timeout: 10000,                   // [optional = 5000] number of milliseconds before forcefull exiting
+  // signal,                          // [optional = 'SIGTERM'] what signal to listen for relative to shutdown
+  onSignal,                        // [optional] cleanup function, returning a promise (used to be onSigterm)
+  onShutdown,                      // [optional] called right before exiting
+  // both
+  // logger                           // [optional] logger function to be called with errors
 });
 
-server = stoppable(server, SERVER_GRACE_STOP_MS);
-
-console.log('Starting up');
-server.listen(PORT, _ => {
-  console.log('Up');
-});
-
-process.on('SIGTERM', _ => {
-  gotSIGTERM = true;
-  console.log('SIGTERM');
-  performance.mark('A');
-
-  // Let the readiness probes fail before we close the server
-  setTimeout(_ => {
-    server.stop(_ => {
-      performance.mark('B');
-      performance.measure('A to B', 'A', 'B');
-      const measure = performance.getEntriesByName('A to B')[0];
-      console.log(`Server closed ${measure.duration}`);
-    });
-  }, READINESS_FAILURE_TIME_MS);
-});
+server.listen(PORT);

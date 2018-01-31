@@ -1,6 +1,4 @@
 #!/bin/sh
-eval $(minikube docker-env)
-
 version=$(cat version)
 version=$((version+1))
 
