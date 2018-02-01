@@ -17,13 +17,12 @@ function onShutdown () {
 }
 
 function check() {
+  console.log(`/healthcheck ${gotSignal}`);
   return Promise.resolve();
 }
 
 const server = http.createServer((request, response) => {
-  if (gotSignal) {
-    console.log(`request ${req.url} after onSignal`);
-  }
+  console.log(`${request.url} ${gotSignal}`);
   setTimeout(() => {
     response.end(`<html><body><h1>Hello, World! v${version}</h1></body></html>`);
   }, 200);
@@ -41,7 +40,7 @@ terminus(server, {
   onSignal,                        // [optional] cleanup function, returning a promise (used to be onSigterm)
   onShutdown,                      // [optional] called right before exiting
   // both
-  // logger                           // [optional] logger function to be called with errors
+  logger: console.log                           // [optional] logger function to be called with errors
 });
 
 server.listen(PORT);
