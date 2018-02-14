@@ -20,6 +20,7 @@ Deploy/update app:
 ./update
 ```
 
+
 Load test:
 ```shell
 wrk -d 2m http://localhost:8080/ -H 'Connection: Close'
