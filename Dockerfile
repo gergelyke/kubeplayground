@@ -1,7 +1,7 @@
 FROM node:latest
 EXPOSE 8080
 COPY server.js .
-COPY version .
+COPY package.json .
 CMD npm install
 
 # Must use exec form otherwise node will not get SIGTERM!
