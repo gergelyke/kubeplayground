@@ -8,4 +8,5 @@ COPY node_modules node_modules
 CMD ["node", "server.js"]
 
 # DO NOT USE SHELL FORM!
+
 # CMD node server.js
