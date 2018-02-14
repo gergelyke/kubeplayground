@@ -16,6 +16,7 @@ function onShutdown () {
   console.log('cleanup finished, server is shutting down');
 }
 
+
 function check() {
   console.log(`/healthcheck ${gotSignal}`);
   return Promise.resolve();
